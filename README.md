@@ -6,6 +6,10 @@ Carlos Andrés Delgado Saavedra
 
 [![Pruebas](../../actions/workflows/pruebas.yml/badge.svg)](../../actions/workflows/pruebas.yml)
 
+Lo que cada parte necesita de las bibliotecas y herramientas está en
+[DOCUMENTACION.md](DOCUMENTACION.md), con ejemplos que corren y los enlaces
+a la documentación oficial.
+
 Cuatro programas, uno por cada decisión que va antes de repartir trabajo: qué
 se reparte y quién decide el reparto; cómo se asignan tareas que no cuestan
 lo mismo; hasta dónde se parte un problema que se divide en dos copias de sí
