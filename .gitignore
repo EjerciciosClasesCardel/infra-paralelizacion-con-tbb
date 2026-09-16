@@ -1,0 +1,7 @@
+# Ejecutables que deja make
+hadamard_hilos
+hadamard_tbb
+balanceo
+maximo
+prefijos
+*.o

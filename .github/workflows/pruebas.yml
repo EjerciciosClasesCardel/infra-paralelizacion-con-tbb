@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  compilar:
+  medir:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,5 +14,67 @@ jobs:
       - name: Instalar TBB
         run: sudo apt-get update && sudo apt-get install -y libtbb-dev
 
-      - name: Compilar y ejecutar
-        run: make
+      - name: "Parte 1: producto de Hadamard con hilos y con TBB"
+        run: make hadamard
+
+      - name: "Parte 1: las dieciséis sumas dan 36 por n"
+        run: |
+          awk '
+            {
+              for (i = 1; i <= NF; i++) { if ($i == "n") n = $(i + 1); if ($i == "suma") suma = $(i + 1) }
+              esperado = 36 * n
+              if (suma + 0 != esperado + 0) {
+                printf "linea %d: la suma dio %s y con n = %s debia dar %.0f\n", NR, suma, n, esperado
+                mal = 1
+              }
+            }
+            END { if (NR < 16) { print "faltan lineas en hadamard.txt: se esperaban 16 y hay " NR; exit 1; }
+                  if (mal) exit 1; }
+          ' hadamard.txt
+          echo "Las sumas coinciden con el valor esperado en las dieciséis corridas."
+
+      - name: "Parte 2: tres repartos sobre dos patrones"
+        run: make balanceo
+
+      - name: "Parte 2: los totales coinciden y el reparto por demanda no pierde"
+        run: |
+          awk '
+            $1 == "creciente" { c[$2] = $3; tc[$2] = $NF }
+            $1 == "periodico" { p[$2] = $3; tp[$2] = $NF }
+            END {
+              for (r in tc) if (tc[r] != 1651577046) { print "creciente " r ": total " tc[r] ", debia ser 1651577046"; mal = 1 }
+              for (r in tp) if (tp[r] != 1702399936) { print "periodico " r ": total " tp[r] ", debia ser 1702399936"; mal = 1 }
+              if (!("demanda" in c) || !("turnos" in c)) { print "faltan lineas en balanceo.txt"; exit 1; }
+              if (mal) exit 1
+              printf "creciente: bloques %s ms, turnos %s ms, demanda %s ms\n", c["bloques"], c["turnos"], c["demanda"]
+              printf "periodico: bloques %s ms, turnos %s ms, demanda %s ms\n", p["bloques"], p["turnos"], p["demanda"]
+              if (c["demanda"] + 0 > c["bloques"] + 0) { print "con el patron creciente, el reparto por demanda tardo mas que los bloques contiguos"; exit 1; }
+              if (p["demanda"] + 0 > p["turnos"] + 0) { print "con el patron periodico, el reparto por demanda tardo mas que los turnos"; exit 1; }
+            }
+          ' balanceo.txt
+
+      - name: "Parte 3: el máximo por divide y vencerás"
+        run: make maximo
+
+      - name: "Parte 3: las seis filas dan el mismo máximo"
+        run: |
+          awk '
+            {
+              for (i = 1; i <= NF; i++) if ($i == "max") m = $(i + 1)
+              if (m != 2147483646) { printf "linea %d: el maximo dio %s y debia dar 2147483646\n", NR, m; mal = 1 }
+            }
+            END { if (NR < 6) { print "faltan filas en maximo.txt: se esperaban 6 y hay " NR; exit 1; }
+                  if (mal) exit 1; }
+          ' maximo.txt
+          echo "El máximo coincide en la versión secuencial y en las cinco profundidades."
+
+      - name: "Parte 4: el máximo acumulado en dos pasadas"
+        run: make prefijos
+
+      - name: "Parte 4: las dos versiones coinciden y la de dos pasadas gana"
+        run: |
+          grep -q "coinciden" prefijos.txt || { echo "las dos versiones no producen la misma serie"; exit 1; }
+          sec=$(awk '$1 == "secuencial" {print $2}' prefijos.txt)
+          dos=$(awk '$1 == "dos_pasadas" {print $2}' prefijos.txt)
+          echo "secuencial: ${sec} ms, dos pasadas: ${dos} ms"
+          awk -v s="$sec" -v d="$dos" 'BEGIN { if (d + 0 >= 0.9 * s) { print "la version en dos pasadas no salio mas rapida que la secuencial en este servidor"; exit 1 } }'
