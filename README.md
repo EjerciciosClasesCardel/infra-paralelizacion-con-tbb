@@ -4,6 +4,8 @@ Infraestructuras Paralelas y Distribuidas
 Escuela de Ingeniería de Sistemas y Computación, Universidad del Valle
 Carlos Andrés Delgado Saavedra
 
+[![Pruebas](../../actions/workflows/pruebas.yml/badge.svg)](../../actions/workflows/pruebas.yml)
+
 Cuatro programas, uno por cada decisión que va antes de repartir trabajo: qué
 se reparte y quién decide el reparto; cómo se asignan tareas que no cuestan
 lo mismo; hasta dónde se parte un problema que se divide en dos copias de sí
@@ -175,21 +177,29 @@ en el `#include`, no al enlazar.
 
 ## Qué revisa el flujo de Actions
 
-- Parte 1: que las dieciséis sumas den `36 * n`.
-- Parte 2: que los seis totales sean los correctos, que el reparto por
-  demanda no tarde más que los bloques en el patrón creciente, y que no tarde
-  más que los turnos en el periódico.
-- Parte 3: que las seis filas impriman el mismo máximo.
-- Parte 4: que las dos series coincidan y que la versión en dos pasadas
-  termine antes que la secuencial.
+- Parte 1: que las dieciséis sumas den `36 * n`, y que con `n = 10^8` cuatro
+  hilos tarden menos que uno, tanto con `std::thread` como con TBB.
+- Parte 2: que los seis totales sean los correctos; que el reparto por
+  demanda no tarde más que los bloques en el patrón creciente ni más que los
+  turnos en el periódico, y que los turnos no tarden más que los bloques en
+  el creciente; y que el programa haya usado más de un procesador en
+  promedio, medido como tiempo de CPU sobre tiempo de reloj.
+- Parte 3: que las seis filas impriman el mismo máximo y que con cuatro hilos
+  salga más rápido que en secuencial.
+- Parte 4: que las dos series coincidan, que la versión en dos pasadas
+  termine antes que la secuencial y que haya corrido en varios procesadores.
+
+Cada parte es un job aparte: la lista de verificaciones del commit dice cuál
+quedó en verde y cuál no, y la pestaña del run trae un resumen con la salida
+de cada programa y el conteo de partes en verde. Cuando una verificación de
+tiempos falla, el flujo repite la corrida una vez antes de marcar rojo, y el
+error queda anotado sobre el archivo de esa parte. Un push nuevo cancela el
+run anterior.
 
 Los tiempos del registro son los de un servidor compartido con cuatro
-procesadores; los que valen para la discusión son los de su máquina.
-
-Un `hadamard` que llame a una versión secuencial imprime la suma correcta y
-pasa. Lo que se mira en clase es lo que el flujo no puede mirar: si el
-reparto es real, si la tabla de tiempos tiene sentido y si la explicación se
-sostiene.
+procesadores; los que valen para la discusión son los de su máquina. Lo que se
+mira en clase es lo que el flujo no puede mirar: si la tabla de tiempos tiene
+sentido y si la explicación se sostiene.
 
 ## Lo que hay que poder explicar
 
