@@ -28,6 +28,28 @@ Van de la más directa a la más exigente. Cada archivo trae el `main`, el
 llenado de los datos y la salida ya escritos; lo que falta está marcado con
 `TODO`.
 
+## Requisitos
+
+| Qué | Linux (Debian/Ubuntu) | macOS | Windows |
+|---|---|---|---|
+| `g++` con C++17, `make` y `pthread` | `sudo apt install build-essential` | `xcode-select --install` | WSL2 con Ubuntu y los comandos de Linux |
+| oneTBB | `sudo apt install libtbb-dev` (lo hace `bash script.sh`) | `brew install tbb` | dentro de WSL2, el mismo `apt` |
+
+Sin TBB el error sale en la primera línea de `hadamard_tbb.cpp`, en el
+`#include`, no al enlazar. En macOS Homebrew deja la biblioteca fuera de las
+rutas que el compilador mira por omisión; antes de `make` se le dicen:
+
+```bash
+export CPATH="$(brew --prefix)/include" LIBRARY_PATH="$(brew --prefix)/lib"
+```
+
+Los tiempos que valen son los de la máquina propia; en WSL2 conviene trabajar
+en el disco de Linux (`~/`) y no en `/mnt/c/`, porque el acceso al disco de
+Windows infla las mediciones.
+
+Cómo dejar cada sistema listo, paso a paso, está en
+[DOCUMENTACION.md](DOCUMENTACION.md), al final.
+
 ## Parte 1: producto de Hadamard, dos versiones
 
 El producto de Hadamard multiplica dos vectores posición a posición,
